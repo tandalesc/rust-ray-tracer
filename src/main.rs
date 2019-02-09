@@ -14,7 +14,6 @@ fn main() {
 
 #[test]
 fn test_scene_render() {
-    use image::GenericImageView;
     use crate::plane::{Plane};
     use crate::scene::{Scene};
     use crate::sphere::{Sphere};
@@ -47,8 +46,5 @@ fn test_scene_render() {
             intensity: 1.0
         }
     };
-    let image = scene.render();
-    let image_path = "test/sample.png";
-    image.save(image_path).unwrap();
-    assert_eq!((scene.width, scene.height), (image.width(), image.height()));
+    scene.render().save("test/sample.png").unwrap();
 }

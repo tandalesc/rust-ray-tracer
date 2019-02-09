@@ -2,11 +2,8 @@
 use image::{DynamicImage, GenericImage, Rgba, Pixel};
 
 use crate::ray::{Ray};
-use crate::primitives::{Color, Renderable, Intersectable};
+use crate::primitives::{Object};
 use crate::light::{Light};
-
-pub trait Object: Renderable + Intersectable {}
-impl<T: Renderable + Intersectable> Object for T {}
 
 pub struct Intersection<'a> {
     pub distance: f64,
@@ -36,7 +33,7 @@ impl<'a> Scene<'a> {
             for y in 0..self.height {
                 let ray = Ray::create_prime(x, y, self);
                 if let Some(i) = self.trace(&ray) {
-                    image.put_pixel(x, y, to_rgba(&i.object.color()));
+                    image.put_pixel(x, y, i.object.color().to_rgba());
                 } else {
                     image.put_pixel(x, y, black);
                 }
@@ -50,11 +47,4 @@ impl<'a> Scene<'a> {
             .filter_map(|&s| s.intersect(ray).map(|d| Intersection::new(d,s)))
             .min_by(|i1, i2| i1.distance.partial_cmp(&i2.distance).unwrap())
     }
-}
-
-fn to_rgba(color: &Color) -> Rgba<u8> {
-    Rgba::from_channels((color.r * 255.0) as u8,
-                        (color.g * 255.0) as u8,
-                        (color.b * 255.0) as u8,
-                        0)
 }
