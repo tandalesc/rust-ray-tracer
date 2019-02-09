@@ -1,0 +1,9 @@
+[package]
+name = "rust-ray-tracer"
+version = "0.1.0"
+authors = ["Shishir Tandale <shishir@tandale.com>"]
+edition = "2018"
+
+[dependencies]
+cgmath = "^0.17.0"
+image = "^0.21.0"
