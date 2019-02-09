@@ -28,4 +28,7 @@ impl Renderable for Plane {
     fn surface_normal(&self, _: &Point) -> Direction {
         -self.normal
     }
+    fn albedo(&self) -> f64 {
+        1.0
+    }
 }

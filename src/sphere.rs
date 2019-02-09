@@ -38,4 +38,7 @@ impl Renderable for Sphere {
     fn surface_normal(&self, hit_point: &Point) -> Direction {
         (*hit_point - self.center).normalize()
     }
+    fn albedo(&self) -> f64 {
+        1.0
+    }
 }

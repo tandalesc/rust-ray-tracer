@@ -17,7 +17,7 @@ fn test_scene_render() {
     use crate::plane::{Plane};
     use crate::scene::{Scene};
     use crate::sphere::{Sphere};
-    use crate::light::{Light};
+    use crate::light::{DirectionalLight};
     use crate::primitives::{Point, Direction, Color};
     let scene = Scene {
         width: 800,
@@ -40,11 +40,13 @@ fn test_scene_render() {
                 color: Color {r:0.3, g:0.3, b:0.3}
             }
         ],
-        light: Light {
-            direction: Direction {x: 0.0, y:-1.0, z: 0.0},
-            color: Color {r:0.8, g:0.8, b:0.6},
-            intensity: 1.0
-        }
+        lights: vec![
+            &DirectionalLight {
+                direction: Direction {x: 0.0, y:-1.0, z: 0.0},
+                color: Color {r:0.8, g:0.8, b:0.6},
+                intensity: 1.0
+            }
+        ]
     };
     scene.render().save("test/sample.png").unwrap();
 }
