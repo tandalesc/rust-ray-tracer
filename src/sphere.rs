@@ -1,7 +1,7 @@
 
 use cgmath::{Vector3, InnerSpace};
-use crate::ray::{Ray, Intersectable};
-use crate::primitives::{Point, Color};
+use crate::ray::{Ray};
+use crate::primitives::{Point, Color, Direction, Renderable, Intersectable};
 
 pub struct Sphere {
     pub center: Point,
@@ -29,5 +29,13 @@ impl Intersectable for Sphere {
         //return minimum distance
         let distance = if t0 < t1 { t0 } else { t1 };
         return Some(distance);
+    }
+}
+impl Renderable for Sphere {
+    fn color(&self) -> &Color {
+        &self.color
+    }
+    fn surface_normal(&self, hit_point: &Point) -> Direction {
+        (*hit_point - self.center).normalize()
     }
 }
