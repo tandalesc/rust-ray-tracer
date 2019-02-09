@@ -24,7 +24,8 @@ pub struct Scene<'a> {
     pub height: u32,
     pub fov: f64,
     pub objects: Vec<&'a Object>,
-    pub lights: Vec<&'a Light>
+    pub lights: Vec<&'a Light>,
+    pub shadow_bias: f64,
 }
 impl<'a> Scene<'a> {
     pub fn render<'b>(&self) -> DynamicImage {
@@ -56,10 +57,20 @@ fn get_color(scene: &Scene, ray: &Ray, intersection: &Intersection) -> Color {
     let surface_normal = intersection.object.surface_normal(&hit_point);
     let mut color: Color = Color::black();
     for light in &scene.lights {
-        let direction_to_light = -light.get_direction().normalize();
-        let light_power = (surface_normal.dot(direction_to_light) as f64).max(0.0) * light.get_intensity();
+        let direction_to_light = -light.get_direction(hit_point).normalize();
+        let shadow_ray = Ray {
+            origin: hit_point + (surface_normal * scene.shadow_bias),
+            direction: direction_to_light
+        };
+        let in_light = match scene.trace(&shadow_ray) {
+            Some(i) => {i.distance > light.get_distance_to(hit_point)}
+            None => {true}
+        };
+
+        let light_intensity = if in_light { light.get_intensity(hit_point) } else { 0.0 };
+        let light_power = (surface_normal.dot(direction_to_light) as f64).max(0.0) * light_intensity;
         let light_reflected = intersection.object.albedo() / std::f64::consts::PI;
-        color += intersection.object.color().clone() * light.get_color().clone() * light_power * light_reflected;
+        color += intersection.object.color().clone() * light.get_color(hit_point).clone() * light_power * light_reflected;
     }
     color.clamp()
 }
