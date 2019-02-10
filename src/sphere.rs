@@ -1,12 +1,12 @@
 
 use cgmath::{Vector3, InnerSpace};
 use crate::ray::{Ray};
-use crate::primitives::{Point, Color, Direction, Renderable, Intersectable};
+use crate::primitives::{Point, Direction, Material, Renderable, Intersectable};
 
 pub struct Sphere {
     pub center: Point,
     pub radius: f64,
-    pub color: Color,
+    pub material: Material,
 }
 impl Intersectable for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<f64> {
@@ -32,13 +32,10 @@ impl Intersectable for Sphere {
     }
 }
 impl Renderable for Sphere {
-    fn color(&self) -> &Color {
-        &self.color
+    fn material(&self) -> &Material {
+        &self.material
     }
     fn surface_normal(&self, hit_point: &Point) -> Direction {
         (*hit_point - self.center).normalize()
-    }
-    fn albedo(&self) -> f64 {
-        1.0
     }
 }

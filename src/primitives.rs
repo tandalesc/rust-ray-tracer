@@ -5,8 +5,33 @@ use image::{Rgba, Pixel};
 
 use crate::ray::Ray;
 
+//Types
 pub type Point = Vector3<f64>;
 pub type Direction = Vector3<f64>;
+
+//Traits
+pub trait Renderable {
+    fn material(&self) -> &Material;
+    fn surface_normal(&self, _: &Point) -> Direction;
+    fn color(&self) -> &Color {
+        &self.material().color
+    }
+    fn albedo(&self) -> f64 {
+        self.material().albedo
+    }
+}
+pub trait Intersectable {
+    fn intersect(&self, ray: &Ray) -> Option<f64>;
+}
+pub trait Object: Renderable + Intersectable {}
+impl<T: Renderable + Intersectable> Object for T {}
+
+//Structs
+#[derive(Debug, Clone, Copy)]
+pub struct Material {
+    pub color: Color,
+    pub albedo: f64
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
@@ -98,14 +123,3 @@ fn gamma_encode(linear: f32) -> f32 {
 fn gamma_decode(encoded: f32) -> f32 {
     encoded.powf(2.2)
 }
-
-pub trait Renderable {
-    fn color(&self) -> &Color;
-    fn surface_normal(&self, _: &Point) -> Direction;
-    fn albedo(&self) -> f64;
-}
-pub trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> Option<f64>;
-}
-pub trait Object: Renderable + Intersectable {}
-impl<T: Renderable + Intersectable> Object for T {}
