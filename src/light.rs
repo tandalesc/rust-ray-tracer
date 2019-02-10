@@ -17,7 +17,7 @@ impl Light for DirectionalLight {
     fn get_direction(&self, _: Point) -> Direction {self.direction}
     fn get_color(&self, _: Point) -> Color {self.color}
     fn get_intensity(&self, _: Point) -> f64 {self.intensity}
-    fn get_distance_to(&self, other: Point) -> f64 {std::f64::MAX}
+    fn get_distance_to(&self, _: Point) -> f64 {std::f64::MAX}
 }
 
 pub struct PointLight {
