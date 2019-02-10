@@ -24,10 +24,34 @@ impl Ray {
             }.normalize()
         }
     }
-    pub fn create_reflection(surface_normal: Direction, direction: Direction, hit_point: Point, shadow_bias: f64) -> Self {
+    pub fn create_reflection(surface_normal: Direction, direction: Direction, hit_point: Point, bias: f64) -> Self {
         Ray {
-            origin: hit_point + (surface_normal * shadow_bias),
+            origin: hit_point + (surface_normal * bias),
             direction: direction - (2.0 * direction.dot(surface_normal) * surface_normal)
+        }
+    }
+    pub fn create_transmission(surface_normal: Direction, direction: Direction, hit_point: Point, bias: f64, index: f64) -> Option<Ray> {
+        let mut d_dot_n = direction.dot(surface_normal);
+        let mut eta_t = index;
+        let mut eta_i = 1.0;
+        let mut ref_n = surface_normal;
+        if d_dot_n < 0.0 {
+            d_dot_n = -d_dot_n;
+        } else {
+            ref_n = -surface_normal;
+            eta_t = 1.0;
+            eta_i = index;
+        }
+
+        let eta = eta_i / eta_t;
+        let k = 1.0 - (eta*eta) * (1.0 - d_dot_n*d_dot_n);
+        if k < 0.0 {
+            None
+        } else {
+            Some(Ray {
+                origin: hit_point + (ref_n * -bias),
+                direction: (direction + d_dot_n * ref_n) * eta - ref_n * k.sqrt()
+            })
         }
     }
 }

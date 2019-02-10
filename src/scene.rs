@@ -69,6 +69,20 @@ fn get_color(scene: &Scene, ray: &Ray, intersection: &Intersection, depth: u32) 
             color += cast_ray(scene, &reflection, depth+1) * reflectivity * specular_color;
             color
         }
+        Refractive{ index, transparency, reflectivity } => {
+            let kr = fresnel(surface_normal, ray.direction, index);
+            let refraction_color = if kr < 1.0 {
+                let transmission_ray = Ray::create_transmission(surface_normal, ray.direction, hit_point, scene.shadow_bias, index).unwrap();
+                cast_ray(scene, &transmission_ray, depth + 1)
+            } else { Color::black() };
+
+            let reflection_ray = Ray::create_reflection(surface_normal, ray.direction, hit_point, scene.shadow_bias);
+            let reflection_color = cast_ray(scene, &reflection_ray, depth + 1);
+            let mut color = shade_diffuse(scene, hit_point, surface_normal, intersection.object);
+            color *= 2.0 - transparency - reflectivity;
+            color += reflection_color * reflectivity * kr + refraction_color * transparency * (1.0-kr);
+            color
+        }
     }
 }
 
@@ -102,4 +116,26 @@ fn shade_diffuse(scene: &Scene, hit_point: Point, surface_normal: Direction, obj
         color += object.color().clone() * light.get_color(hit_point).clone() * light_power * light_reflected;
     }
     color.clamp()
+}
+
+fn fresnel(surface_normal: Direction, direction: Direction, index: f64) -> f64 {
+    let d_dot_n = direction.dot(surface_normal);
+    let mut eta_i = 1.0;
+    let mut eta_t = index;
+    if d_dot_n > 0.0 {
+        eta_i = eta_t;
+        eta_t = 1.0;
+    }
+
+    let sin_t = eta_i/eta_t * (1.0 - d_dot_n*d_dot_n).max(0.0).sqrt();
+    if sin_t > 1.0 {
+        //Total internal reflection
+        1.0
+    } else {
+        let cos_t = (1.0 - sin_t*sin_t).max(0.0).sqrt();
+        let cos_i = cos_t.abs();
+        let r_s = ((eta_t * cos_i) - (eta_i * cos_t)) / ((eta_t * cos_i) + (eta_i * cos_t));
+        let r_p = ((eta_i * cos_i) - (eta_t * cos_t)) / ((eta_i * cos_i) + (eta_t * cos_t));
+        (r_s*r_s + r_p*r_p) / 2.0
+    }
 }

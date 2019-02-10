@@ -34,6 +34,11 @@ pub enum SurfaceType {
         reflectivity: f64,
         specular_color: Color,
     },
+    Refractive {
+        index: f64,
+        transparency: f64,
+        reflectivity: f64,
+    }
 }
 
 //Structs
