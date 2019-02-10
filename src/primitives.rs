@@ -1,5 +1,5 @@
 
-use std::ops::{Mul,Add,AddAssign};
+use std::ops::{Mul,Add,AddAssign,MulAssign};
 use cgmath::{Vector3};
 use image::{Rgba, Pixel};
 
@@ -26,11 +26,22 @@ pub trait Intersectable {
 pub trait Object: Renderable + Intersectable {}
 impl<T: Renderable + Intersectable> Object for T {}
 
+//Enums
+#[derive(Debug, Clone, Copy)]
+pub enum SurfaceType {
+    Diffuse,
+    Reflective {
+        reflectivity: f64,
+        specular_color: Color,
+    },
+}
+
 //Structs
 #[derive(Debug, Clone, Copy)]
 pub struct Material {
     pub color: Color,
-    pub albedo: f64
+    pub albedo: f64,
+    pub surface: SurfaceType,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -95,6 +106,13 @@ impl Mul for Color {
         }
     }
 }
+impl MulAssign for Color {
+    fn mul_assign(&mut self, other: Color) {
+        self.r *= other.r;
+        self.g *= other.g;
+        self.b *= other.b;
+    }
+}
 impl Mul<f32> for Color {
     type Output = Color;
     fn mul(self, other: f32) -> Color {
@@ -103,6 +121,18 @@ impl Mul<f32> for Color {
             b: self.b * other,
             g: self.g * other,
         }
+    }
+}
+impl MulAssign<f32> for Color {
+    fn mul_assign(&mut self, other: f32) {
+        self.r *= other;
+        self.g *= other;
+        self.b *= other;
+    }
+}
+impl MulAssign<f64> for Color {
+    fn mul_assign(&mut self, other: f64) {
+        *self *= other as f32;
     }
 }
 impl Mul<Color> for f32 {
